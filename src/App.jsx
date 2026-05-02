@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react'
 import Dashboard from './components/Dashboard'
 import AddTaskModal from './components/AddTaskModal'
+import { LanguageProvider, useLanguage } from './context/LanguageContext'
 import './App.css'
 
-function App() {
+function AppInner() {
+  const { lang, toggleLanguage, t } = useLanguage()
+
   const [tasks, setTasks] = useState(() => {
     try {
       const saved = localStorage.getItem('medmap-tasks')
@@ -65,18 +68,34 @@ function App() {
             </div>
             <div>
               <span className="text-xl font-bold text-slate-800">MedMap</span>
-              <span className="text-slate-400 text-sm ml-2 hidden sm:inline">your medical to-do list</span>
+              <span className="text-slate-400 text-sm ml-2 hidden sm:inline">{t.tagline}</span>
             </div>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors flex items-center gap-1.5 shadow-sm"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Task
-          </button>
+
+          {/* Right side: language toggle + add task */}
+          <div className="flex items-center gap-2">
+            {/* Language toggle */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-0.5 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors"
+              aria-label="Toggle language"
+            >
+              <span className={lang === 'en' ? 'text-teal-600' : 'text-slate-400'}>EN</span>
+              <span className="text-slate-300 mx-1">|</span>
+              <span className={lang === 'vi' ? 'text-teal-600' : 'text-slate-400'}>VI</span>
+            </button>
+
+            {/* Add task */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors flex items-center gap-1.5 shadow-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              {t.addTask}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -110,6 +129,14 @@ function App() {
         />
       )}
     </div>
+  )
+}
+
+function App() {
+  return (
+    <LanguageProvider>
+      <AppInner />
+    </LanguageProvider>
   )
 }
 

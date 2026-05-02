@@ -1,11 +1,4 @@
-const TYPE_LABELS = {
-  lab: 'Labs',
-  imaging: 'Imaging',
-  referral: 'Referral',
-  screening: 'Screening',
-  prescription: 'Prescription',
-  callback: 'Call Back',
-}
+import { useLanguage, getLabel, SPECIALTIES, SCREENING_OPTIONS, FASTING_OPTIONS, IMAGING_TYPES } from '../context/LanguageContext'
 
 const TYPE_COLORS = {
   lab: 'bg-purple-100 text-purple-700',
@@ -16,11 +9,11 @@ const TYPE_COLORS = {
   callback: 'bg-amber-100 text-amber-700',
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr, locale) {
   if (!dateStr) return null
   const [year, month, day] = dateStr.split('-').map(Number)
   const date = new Date(year, month - 1, day)
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return date.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function isOverdue(dateStr) {
@@ -106,28 +99,31 @@ function DetailRow({ icon, text, multiline }) {
   )
 }
 
-function TaskDetails({ task }) {
+function TaskDetails({ task, lang }) {
   const rows = []
 
   if (task.type === 'lab') {
-    if (task.fasting) rows.push({ icon: 'fasting', text: task.fasting })
+    if (task.fasting) rows.push({ icon: 'fasting', text: getLabel(FASTING_OPTIONS, task.fasting, lang) })
     if (task.notes) rows.push({ icon: 'note', text: task.notes, multiline: true })
   }
 
   if (task.type === 'imaging') {
-    if (task.imagingTypes?.length) rows.push({ icon: 'tag', text: task.imagingTypes.join(' · ') })
+    if (task.imagingTypes?.length) {
+      const labels = task.imagingTypes.map(it => getLabel(IMAGING_TYPES, it, lang))
+      rows.push({ icon: 'tag', text: labels.join(' · ') })
+    }
     if (task.bodyParts) rows.push({ icon: 'body', text: task.bodyParts })
     if (task.officePhone) rows.push({ icon: 'phone', text: task.officePhone })
     if (task.notes) rows.push({ icon: 'note', text: task.notes, multiline: true })
   }
 
   if (task.type === 'referral') {
-    if (task.specialty) rows.push({ icon: 'tag', text: task.specialty })
+    if (task.specialty) rows.push({ icon: 'tag', text: getLabel(SPECIALTIES, task.specialty, lang) })
     if (task.phoneNumber) rows.push({ icon: 'phone', text: task.phoneNumber })
   }
 
   if (task.type === 'screening') {
-    if (task.screeningType) rows.push({ icon: 'tag', text: task.screeningType })
+    if (task.screeningType) rows.push({ icon: 'tag', text: getLabel(SCREENING_OPTIONS, task.screeningType, lang) })
     if (task.phoneNumber) rows.push({ icon: 'phone', text: task.phoneNumber })
   }
 
@@ -151,8 +147,10 @@ function TaskDetails({ task }) {
 }
 
 export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
+  const { lang, t } = useLanguage()
+
   const doctorName = getDoctorName(task)
-  const formattedDate = task.dueDate ? formatDate(task.dueDate) : null
+  const formattedDate = task.dueDate ? formatDate(task.dueDate, t.dateLocale) : null
   const overdue = !task.completed && isOverdue(task.dueDate)
 
   return (
@@ -169,7 +167,7 @@ export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
             ? 'bg-green-500 border-green-500 text-white'
             : 'border-slate-300 hover:border-teal-400'
         }`}
-        aria-label={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+        aria-label={task.completed ? t.markIncomplete : t.markComplete}
       >
         {task.completed && (
           <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3.5}>
@@ -183,16 +181,16 @@ export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
         {/* Badges row */}
         <div className="flex items-center gap-2 flex-wrap mb-1.5">
           <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${TYPE_COLORS[task.type]}`}>
-            {TYPE_LABELS[task.type]}
+            {t.typeLabels[task.type]}
           </span>
           {task.completed && (
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-green-100 text-green-700">
-              Complete
+              {t.completeBadge}
             </span>
           )}
           {overdue && (
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600">
-              Overdue
+              {t.overdueBadge}
             </span>
           )}
         </div>
@@ -232,7 +230,7 @@ export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
         </div>
 
         {/* Expanded task-specific details */}
-        <TaskDetails task={task} />
+        <TaskDetails task={task} lang={lang} />
       </div>
 
       {/* Edit + Delete buttons */}
@@ -240,7 +238,7 @@ export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
         <button
           onClick={onEdit}
           className="text-slate-300 hover:text-teal-500 transition-colors p-1"
-          aria-label="Edit task"
+          aria-label={t.editTaskLabel}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -249,7 +247,7 @@ export default function TaskCard({ task, onToggleComplete, onDelete, onEdit }) {
         <button
           onClick={onDelete}
           className="text-slate-300 hover:text-red-400 transition-colors p-1 -mr-1"
-          aria-label="Delete task"
+          aria-label={t.deleteTaskLabel}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

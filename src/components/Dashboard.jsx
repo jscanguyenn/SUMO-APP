@@ -1,4 +1,5 @@
 import TaskCard from './TaskCard'
+import { useLanguage } from '../context/LanguageContext'
 
 function sortTasks(tasks) {
   const dated = tasks
@@ -17,6 +18,8 @@ export default function Dashboard({
   onEdit,
   onAddTask,
 }) {
+  const { t } = useLanguage()
+
   const openTasks = sortTasks(tasks.filter(t => !t.completed))
   const completedTasks = sortTasks(tasks.filter(t => t.completed))
   const displayed = showCompleted ? completedTasks : openTasks
@@ -27,12 +30,12 @@ export default function Dashboard({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-slate-800">
-            {showCompleted ? 'Completed Tasks' : 'Open Tasks'}
+            {showCompleted ? t.completedTasksTitle : t.openTasksTitle}
           </h1>
           <p className="text-slate-500 text-sm mt-0.5">
             {showCompleted
-              ? `${completedTasks.length} task${completedTasks.length !== 1 ? 's' : ''} done`
-              : `${openTasks.length} task${openTasks.length !== 1 ? 's' : ''} remaining`}
+              ? t.tasksDone(completedTasks.length)
+              : t.tasksRemaining(openTasks.length)}
           </p>
         </div>
 
@@ -45,14 +48,14 @@ export default function Dashboard({
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
-              View Open
+              {t.viewOpen}
             </>
           ) : (
             <>
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              View Completed
+              {t.viewCompleted}
             </>
           )}
         </button>
@@ -68,8 +71,8 @@ export default function Dashboard({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="font-medium text-slate-500">No completed tasks yet</p>
-              <p className="text-sm mt-1">Mark a task as done and it'll appear here</p>
+              <p className="font-medium text-slate-500">{t.noCompletedYet}</p>
+              <p className="text-sm mt-1">{t.noCompletedDesc}</p>
             </>
           ) : (
             <>
@@ -78,8 +81,8 @@ export default function Dashboard({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
-              <p className="font-medium text-slate-500">No open tasks</p>
-              <p className="text-sm mt-1 mb-5">Your medical to-do list is empty</p>
+              <p className="font-medium text-slate-500">{t.noOpenTasks}</p>
+              <p className="text-sm mt-1 mb-5">{t.noOpenDesc}</p>
               <button
                 onClick={onAddTask}
                 className="bg-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors inline-flex items-center gap-2 shadow-sm"
@@ -87,7 +90,7 @@ export default function Dashboard({
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
-                Add Task
+                {t.addTask}
               </button>
             </>
           )}

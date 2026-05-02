@@ -1,21 +1,5 @@
 import { useState } from 'react'
-
-const SPECIALTIES = [
-  'Cardiology', 'Endocrinology', 'Gastroenterology', 'Hematology/Oncology',
-  'Nephrology', 'Pulmonology', 'Rheumatology', 'Allergy and Immunology',
-  'Dermatology', 'OBGYN', 'General Surgery', 'Orthopedic Surgery',
-  'Vascular Surgery', 'Thoracic and Cardiac Surgery', 'Neurosurgery',
-  'Plastic/Reconstructive Surgery', 'Otolaryngology (ENT)', 'Ophthalmology',
-  'Neurology', 'Psychiatry', 'Urology', 'Geriatric Medicine',
-  'Physical Medicine and Rehabilitation (PM&R)',
-]
-
-const SCREENING_OPTIONS = [
-  'DEXA (bone density scan)', 'Colonoscopy', 'Fecal Occult Blood Test (FOBT)',
-  'Mammogram', 'Cervical Cancer Screening', 'Diabetic Eye Exam (Ophthalmologist)',
-]
-
-const IMAGING_TYPES = ['CT', 'MRI', 'X-ray', 'Ultrasound', 'PET']
+import { useLanguage, SPECIALTIES, SCREENING_OPTIONS, FASTING_OPTIONS, IMAGING_TYPES } from '../context/LanguageContext'
 
 const inputClass =
   'w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition'
@@ -32,9 +16,9 @@ function Label({ children, required }) {
   )
 }
 
-function FieldError({ show }) {
+function FieldError({ show, message }) {
   if (!show) return null
-  return <p className="text-xs text-red-500 mt-1">This field is required</p>
+  return <p className="text-xs text-red-500 mt-1">{message}</p>
 }
 
 const EMPTY_FORM = {
@@ -54,6 +38,8 @@ const EMPTY_FORM = {
 }
 
 export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEditing }) {
+  const { lang, t } = useLanguage()
+
   const [form, setForm] = useState(() => ({
     ...EMPTY_FORM,
     ...(initialValues
@@ -81,12 +67,13 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: false }))
   }
 
-  const toggleImagingType = (t) => {
+  // Imaging types are stored as English canonical values (e.g. "X-ray", not "X-quang")
+  const toggleImagingType = (canonicalValue) => {
     setForm(prev => ({
       ...prev,
-      imagingTypes: prev.imagingTypes.includes(t)
-        ? prev.imagingTypes.filter(x => x !== t)
-        : [...prev.imagingTypes, t],
+      imagingTypes: prev.imagingTypes.includes(canonicalValue)
+        ? prev.imagingTypes.filter(x => x !== canonicalValue)
+        : [...prev.imagingTypes, canonicalValue],
     }))
     if (errors.imagingTypes) setErrors(prev => ({ ...prev, imagingTypes: false }))
   }
@@ -132,67 +119,67 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
     onSubmit({ ...form, type })
   }
 
+  const taskNamePlaceholder =
+    t.taskNamePlaceholders[type] ?? t.taskNamePlaceholders.default
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
       {/* Task Name — universal */}
       <div>
-        <Label required>Task Name</Label>
+        <Label required>{t.taskNameLabel}</Label>
         <input
           type="text"
-          placeholder={
-            type === 'lab' ? 'e.g. "Lipid Panel" or "CMP"' :
-            type === 'imaging' ? 'e.g. "X-ray" or "Ultrasound"' :
-            type === 'screening' ? 'e.g. "DEXA" or "Colonoscopy"' :
-            type === 'referral' ? 'e.g. "Orthopedic Surgery" or "Dermatology"' :
-            'Task Name'
-          }
+          placeholder={taskNamePlaceholder}
           value={form.taskName}
           onChange={set('taskName')}
           className={`${inputClass} ${errors.taskName ? inputErr : ''}`}
         />
-        <FieldError show={errors.taskName} />
+        <FieldError show={errors.taskName} message={t.requiredField} />
       </div>
 
       {/* ── LAB ── */}
       {type === 'lab' && <>
         <div>
-          <Label required>Fasting</Label>
+          <Label required>{t.fastingLabel}</Label>
           <div className={`flex gap-4 mt-1 ${errors.fasting ? 'p-2 border border-red-400 rounded-lg' : ''}`}>
-            {['Fasting', 'Non-fasting'].map(opt => (
-              <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="fasting"
-                  value={opt}
-                  checked={form.fasting === opt}
-                  onChange={() => {
-                    setForm(prev => ({ ...prev, fasting: opt }))
-                    if (errors.fasting) setErrors(prev => ({ ...prev, fasting: false }))
-                  }}
-                  className="accent-teal-500"
-                />
-                <span className="text-sm text-slate-700">{opt}</span>
-              </label>
-            ))}
+            {FASTING_OPTIONS.map(([canonical, viLabel]) => {
+              const displayLabel = lang === 'vi' ? viLabel : canonical
+              return (
+                <label key={canonical} className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="fasting"
+                    value={canonical}
+                    checked={form.fasting === canonical}
+                    onChange={() => {
+                      setForm(prev => ({ ...prev, fasting: canonical }))
+                      if (errors.fasting) setErrors(prev => ({ ...prev, fasting: false }))
+                    }}
+                    className="accent-teal-500"
+                  />
+                  <span className="text-sm text-slate-700">{displayLabel}</span>
+                </label>
+              )
+            })}
           </div>
-          <FieldError show={errors.fasting} />
+          <FieldError show={errors.fasting} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Due Date</Label>
+          <Label required>{t.dueDateLabel}</Label>
           <input type="date" value={form.dueDate} onChange={set('dueDate')}
             className={`${inputClass} ${errors.dueDate ? inputErr : ''}`} />
-          <FieldError show={errors.dueDate} />
+          <FieldError show={errors.dueDate} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Ordering Doctor</Label>
+          <Label required>{t.orderingDoctorLabel}</Label>
           <input type="text" placeholder="Dr. Jane Smith" value={form.orderingDoctor} onChange={set('orderingDoctor')}
             className={`${inputClass} ${errors.orderingDoctor ? inputErr : ''}`} />
-          <FieldError show={errors.orderingDoctor} />
+          <FieldError show={errors.orderingDoctor} message={t.requiredField} />
         </div>
         <div>
-          <Label>Notes</Label>
-          <textarea rows={3} placeholder="Any additional notes…" value={form.notes} onChange={set('notes')}
+          <Label>{t.notesLabel}</Label>
+          <textarea rows={3} placeholder={t.notesPlaceholder} value={form.notes} onChange={set('notes')}
             className={inputClass} />
         </div>
       </>}
@@ -200,50 +187,53 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
       {/* ── IMAGING ── */}
       {type === 'imaging' && <>
         <div>
-          <Label required>Imaging Type</Label>
+          <Label required>{t.imagingTypeLabel}</Label>
           <div className={`flex flex-wrap gap-2 mt-1 ${errors.imagingTypes ? 'p-2 border border-red-400 rounded-lg' : ''}`}>
-            {IMAGING_TYPES.map(t => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => toggleImagingType(t)}
-                className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
-                  form.imagingTypes.includes(t)
-                    ? 'bg-teal-500 border-teal-500 text-white'
-                    : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50'
-                }`}
-              >
-                {t}
-              </button>
-            ))}
+            {IMAGING_TYPES.map(([canonical, viLabel]) => {
+              const displayLabel = lang === 'vi' ? viLabel : canonical
+              return (
+                <button
+                  key={canonical}
+                  type="button"
+                  onClick={() => toggleImagingType(canonical)}
+                  className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                    form.imagingTypes.includes(canonical)
+                      ? 'bg-teal-500 border-teal-500 text-white'
+                      : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50'
+                  }`}
+                >
+                  {displayLabel}
+                </button>
+              )
+            })}
           </div>
-          <FieldError show={errors.imagingTypes} />
+          <FieldError show={errors.imagingTypes} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Due Date</Label>
+          <Label required>{t.dueDateLabel}</Label>
           <input type="date" value={form.dueDate} onChange={set('dueDate')}
             className={`${inputClass} ${errors.dueDate ? inputErr : ''}`} />
-          <FieldError show={errors.dueDate} />
+          <FieldError show={errors.dueDate} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Ordering Doctor</Label>
+          <Label required>{t.orderingDoctorLabel}</Label>
           <input type="text" placeholder="Dr. Jane Smith" value={form.orderingDoctor} onChange={set('orderingDoctor')}
             className={`${inputClass} ${errors.orderingDoctor ? inputErr : ''}`} />
-          <FieldError show={errors.orderingDoctor} />
+          <FieldError show={errors.orderingDoctor} message={t.requiredField} />
         </div>
         <div>
-          <Label>Office Phone</Label>
+          <Label>{t.officePhoneLabel}</Label>
           <input type="tel" placeholder="(555) 000-0000" value={form.officePhone} onChange={set('officePhone')}
             className={inputClass} />
         </div>
         <div>
-          <Label>Body Part(s)</Label>
-          <input type="text" placeholder="e.g. Chest, Abdomen" value={form.bodyParts} onChange={set('bodyParts')}
+          <Label>{t.bodyPartsLabel}</Label>
+          <input type="text" placeholder={t.bodyPartsPlaceholder} value={form.bodyParts} onChange={set('bodyParts')}
             className={inputClass} />
         </div>
         <div>
-          <Label>Notes</Label>
-          <textarea rows={3} placeholder="Any additional notes…" value={form.notes} onChange={set('notes')}
+          <Label>{t.notesLabel}</Label>
+          <textarea rows={3} placeholder={t.notesPlaceholder} value={form.notes} onChange={set('notes')}
             className={inputClass} />
         </div>
       </>}
@@ -251,28 +241,32 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
       {/* ── REFERRAL ── */}
       {type === 'referral' && <>
         <div>
-          <Label required>Specialty</Label>
+          <Label required>{t.specialtyLabel}</Label>
           <select value={form.specialty} onChange={set('specialty')}
             className={`${inputClass} ${errors.specialty ? inputErr : ''}`}>
-            <option value="">Select specialty…</option>
-            {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="">{t.selectSpecialtyPlaceholder}</option>
+            {SPECIALTIES.map(([canonical, viLabel]) => (
+              <option key={canonical} value={canonical}>
+                {lang === 'vi' ? viLabel : canonical}
+              </option>
+            ))}
           </select>
-          <FieldError show={errors.specialty} />
+          <FieldError show={errors.specialty} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Due Date</Label>
+          <Label required>{t.dueDateLabel}</Label>
           <input type="date" value={form.dueDate} onChange={set('dueDate')}
             className={`${inputClass} ${errors.dueDate ? inputErr : ''}`} />
-          <FieldError show={errors.dueDate} />
+          <FieldError show={errors.dueDate} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Doctor Name</Label>
+          <Label required>{t.doctorNameLabel}</Label>
           <input type="text" placeholder="Dr. Jane Smith" value={form.doctorName} onChange={set('doctorName')}
             className={`${inputClass} ${errors.doctorName ? inputErr : ''}`} />
-          <FieldError show={errors.doctorName} />
+          <FieldError show={errors.doctorName} message={t.requiredField} />
         </div>
         <div>
-          <Label>Phone Number</Label>
+          <Label>{t.phoneNumberLabel}</Label>
           <input type="tel" placeholder="(555) 000-0000" value={form.phoneNumber} onChange={set('phoneNumber')}
             className={inputClass} />
         </div>
@@ -281,27 +275,31 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
       {/* ── SCREENING ── */}
       {type === 'screening' && <>
         <div>
-          <Label required>Screening Type</Label>
+          <Label required>{t.screeningTypeLabel}</Label>
           <select value={form.screeningType} onChange={set('screeningType')}
             className={`${inputClass} ${errors.screeningType ? inputErr : ''}`}>
-            <option value="">Select screening…</option>
-            {SCREENING_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+            <option value="">{t.selectScreeningPlaceholder}</option>
+            {SCREENING_OPTIONS.map(([canonical, viLabel]) => (
+              <option key={canonical} value={canonical}>
+                {lang === 'vi' ? viLabel : canonical}
+              </option>
+            ))}
           </select>
-          <FieldError show={errors.screeningType} />
+          <FieldError show={errors.screeningType} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Due Date</Label>
+          <Label required>{t.dueDateLabel}</Label>
           <input type="date" value={form.dueDate} onChange={set('dueDate')}
             className={`${inputClass} ${errors.dueDate ? inputErr : ''}`} />
-          <FieldError show={errors.dueDate} />
+          <FieldError show={errors.dueDate} message={t.requiredField} />
         </div>
         <div>
-          <Label>Ordering Doctor</Label>
+          <Label>{t.orderingDoctorLabel}</Label>
           <input type="text" placeholder="Dr. Jane Smith" value={form.orderingDoctor} onChange={set('orderingDoctor')}
             className={inputClass} />
         </div>
         <div>
-          <Label>Phone Number</Label>
+          <Label>{t.phoneNumberLabel}</Label>
           <input type="tel" placeholder="(555) 000-0000" value={form.phoneNumber} onChange={set('phoneNumber')}
             className={inputClass} />
         </div>
@@ -310,31 +308,31 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
       {/* ── PRESCRIPTION ── */}
       {type === 'prescription' && <>
         <div>
-          <Label required>Prescription Name(s)</Label>
+          <Label required>{t.prescriptionNamesLabel}</Label>
           <textarea
             rows={3}
-            placeholder="e.g. Metformin 500mg, Lisinopril 10mg"
+            placeholder={t.prescriptionPlaceholder}
             value={form.prescriptionNames}
             onChange={set('prescriptionNames')}
             className={`${inputClass} ${errors.prescriptionNames ? inputErr : ''}`}
           />
-          <FieldError show={errors.prescriptionNames} />
+          <FieldError show={errors.prescriptionNames} message={t.requiredField} />
         </div>
       </>}
 
       {/* ── CALLBACK ── */}
       {type === 'callback' && <>
         <div>
-          <Label required>Doctor Name</Label>
+          <Label required>{t.doctorNameLabel}</Label>
           <input type="text" placeholder="Dr. Jane Smith" value={form.doctorName} onChange={set('doctorName')}
             className={`${inputClass} ${errors.doctorName ? inputErr : ''}`} />
-          <FieldError show={errors.doctorName} />
+          <FieldError show={errors.doctorName} message={t.requiredField} />
         </div>
         <div>
-          <Label required>Phone Number</Label>
+          <Label required>{t.phoneNumberLabel}</Label>
           <input type="tel" placeholder="(555) 000-0000" value={form.phoneNumber} onChange={set('phoneNumber')}
             className={`${inputClass} ${errors.phoneNumber ? inputErr : ''}`} />
-          <FieldError show={errors.phoneNumber} />
+          <FieldError show={errors.phoneNumber} message={t.requiredField} />
         </div>
       </>}
 
@@ -345,13 +343,13 @@ export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEd
           onClick={onCancel}
           className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors"
         >
-          Cancel
+          {t.cancel}
         </button>
         <button
           type="submit"
           className="flex-1 bg-teal-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors"
         >
-          {isEditing ? 'Save Changes' : 'Add Task'}
+          {isEditing ? t.saveChanges : t.addTask}
         </button>
       </div>
     </form>

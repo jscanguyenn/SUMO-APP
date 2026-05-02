@@ -1,20 +1,13 @@
 import { useState } from 'react'
 import TaskForm from './TaskForm'
-
-const TASK_TYPES = [
-  { id: 'lab', label: 'Labs', icon: '🧪', desc: 'Blood work, urine tests' },
-  { id: 'imaging', label: 'Imaging', icon: '🩻', desc: 'CT, MRI, X-ray, Ultrasound' },
-  { id: 'referral', label: 'Referral', icon: '👨‍⚕️', desc: 'See a specialist' },
-  { id: 'screening', label: 'Screening', icon: '🔍', desc: 'Colonoscopy, mammogram, etc.' },
-  { id: 'prescription', label: 'Pick Up Prescription', icon: '💊', desc: 'Medications to pick up' },
-  { id: 'callback', label: 'Call Back', icon: '📞', desc: 'Call to make an appointment' },
-]
+import { useLanguage } from '../context/LanguageContext'
 
 export default function AddTaskModal({ onAdd, onClose, initialTask }) {
+  const { t } = useLanguage()
   const isEditing = !!initialTask
   const [selectedType, setSelectedType] = useState(initialTask?.type ?? null)
 
-  const selectedMeta = TASK_TYPES.find(t => t.id === selectedType)
+  const selectedMeta = t.taskTypes.find(tt => tt.id === selectedType)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -34,21 +27,21 @@ export default function AddTaskModal({ onAdd, onClose, initialTask }) {
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
-                Back
+                {t.back}
               </button>
             )}
             <h2 className="text-lg font-semibold text-slate-800">
               {isEditing
-                ? `Edit ${selectedMeta?.label ?? ''} Task`
+                ? t.editTitle(selectedMeta?.label ?? '')
                 : selectedType
-                  ? `New ${selectedMeta.label} Task`
-                  : 'Add a Task'}
+                  ? t.newTitle(selectedMeta.label)
+                  : t.addATask}
             </h2>
           </div>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
-            aria-label="Close"
+            aria-label={t.close}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -60,7 +53,7 @@ export default function AddTaskModal({ onAdd, onClose, initialTask }) {
         <div className="overflow-y-auto p-6">
           {!selectedType ? (
             <div className="grid grid-cols-2 gap-3">
-              {TASK_TYPES.map(type => (
+              {t.taskTypes.map(type => (
                 <button
                   key={type.id}
                   onClick={() => setSelectedType(type.id)}
