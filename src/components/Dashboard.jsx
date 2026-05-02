@@ -14,6 +14,8 @@ export default function Dashboard({
   onToggleShowCompleted,
   onToggleComplete,
   onDelete,
+  onEdit,
+  onAddTask,
 }) {
   const openTasks = sortTasks(tasks.filter(t => !t.completed))
   const completedTasks = sortTasks(tasks.filter(t => t.completed))
@@ -36,7 +38,7 @@ export default function Dashboard({
 
         <button
           onClick={onToggleShowCompleted}
-          className="text-sm font-medium text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+          className="text-sm font-medium text-teal-600 border border-teal-200 px-3 py-1.5 rounded-lg hover:bg-teal-50 transition-colors flex items-center gap-1.5"
         >
           {showCompleted ? (
             <>
@@ -71,13 +73,22 @@ export default function Dashboard({
             </>
           ) : (
             <>
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <p className="font-medium text-slate-500">No open tasks</p>
-              <p className="text-sm mt-1">Click <span className="font-medium text-blue-500">Add Task</span> to get started</p>
+              <p className="text-sm mt-1 mb-5">Your medical to-do list is empty</p>
+              <button
+                onClick={onAddTask}
+                className="bg-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors inline-flex items-center gap-2 shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Task
+              </button>
             </>
           )}
         </div>
@@ -89,6 +100,7 @@ export default function Dashboard({
               task={task}
               onToggleComplete={() => onToggleComplete(task.id)}
               onDelete={() => onDelete(task.id)}
+              onEdit={() => onEdit(task)}
             />
           ))}
         </div>

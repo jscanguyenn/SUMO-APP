@@ -18,7 +18,7 @@ const SCREENING_OPTIONS = [
 const IMAGING_TYPES = ['CT', 'MRI', 'X-ray', 'Ultrasound', 'PET']
 
 const inputClass =
-  'w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition'
+  'w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition'
 
 const inputErr =
   'border-red-400 focus:ring-red-200 focus:border-red-400'
@@ -37,22 +37,43 @@ function FieldError({ show }) {
   return <p className="text-xs text-red-500 mt-1">This field is required</p>
 }
 
-export default function TaskForm({ type, onSubmit, onCancel }) {
-  const [form, setForm] = useState({
-    taskName: '',
-    fasting: '',           // 'Fasting' | 'Non-fasting' | ''
-    dueDate: '',
-    orderingDoctor: '',
-    notes: '',
-    imagingTypes: [],
-    officePhone: '',
-    bodyParts: '',
-    specialty: '',
-    doctorName: '',
-    phoneNumber: '',
-    screeningType: '',
-    prescriptionNames: '',
-  })
+const EMPTY_FORM = {
+  taskName: '',
+  fasting: '',
+  dueDate: '',
+  orderingDoctor: '',
+  notes: '',
+  imagingTypes: [],
+  officePhone: '',
+  bodyParts: '',
+  specialty: '',
+  doctorName: '',
+  phoneNumber: '',
+  screeningType: '',
+  prescriptionNames: '',
+}
+
+export default function TaskForm({ type, onSubmit, onCancel, initialValues, isEditing }) {
+  const [form, setForm] = useState(() => ({
+    ...EMPTY_FORM,
+    ...(initialValues
+      ? {
+          taskName: initialValues.taskName ?? '',
+          fasting: initialValues.fasting ?? '',
+          dueDate: initialValues.dueDate ?? '',
+          orderingDoctor: initialValues.orderingDoctor ?? '',
+          notes: initialValues.notes ?? '',
+          imagingTypes: initialValues.imagingTypes ?? [],
+          officePhone: initialValues.officePhone ?? '',
+          bodyParts: initialValues.bodyParts ?? '',
+          specialty: initialValues.specialty ?? '',
+          doctorName: initialValues.doctorName ?? '',
+          phoneNumber: initialValues.phoneNumber ?? '',
+          screeningType: initialValues.screeningType ?? '',
+          prescriptionNames: initialValues.prescriptionNames ?? '',
+        }
+      : {}),
+  }))
   const [errors, setErrors] = useState({})
 
   const set = (field) => (e) => {
@@ -149,7 +170,7 @@ export default function TaskForm({ type, onSubmit, onCancel }) {
                     setForm(prev => ({ ...prev, fasting: opt }))
                     if (errors.fasting) setErrors(prev => ({ ...prev, fasting: false }))
                   }}
-                  className="accent-blue-600"
+                  className="accent-teal-500"
                 />
                 <span className="text-sm text-slate-700">{opt}</span>
               </label>
@@ -188,8 +209,8 @@ export default function TaskForm({ type, onSubmit, onCancel }) {
                 onClick={() => toggleImagingType(t)}
                 className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
                   form.imagingTypes.includes(t)
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50'
+                    ? 'bg-teal-500 border-teal-500 text-white'
+                    : 'border-slate-200 text-slate-600 hover:border-teal-300 hover:bg-teal-50'
                 }`}
               >
                 {t}
@@ -328,9 +349,9 @@ export default function TaskForm({ type, onSubmit, onCancel }) {
         </button>
         <button
           type="submit"
-          className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors"
+          className="flex-1 bg-teal-500 text-white py-2 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors"
         >
-          Add Task
+          {isEditing ? 'Save Changes' : 'Add Task'}
         </button>
       </div>
     </form>

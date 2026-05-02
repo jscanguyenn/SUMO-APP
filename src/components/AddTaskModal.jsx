@@ -10,8 +10,9 @@ const TASK_TYPES = [
   { id: 'callback', label: 'Call Back', icon: '📞', desc: 'Call to make an appointment' },
 ]
 
-export default function AddTaskModal({ onAdd, onClose }) {
-  const [selectedType, setSelectedType] = useState(null)
+export default function AddTaskModal({ onAdd, onClose, initialTask }) {
+  const isEditing = !!initialTask
+  const [selectedType, setSelectedType] = useState(initialTask?.type ?? null)
 
   const selectedMeta = TASK_TYPES.find(t => t.id === selectedType)
 
@@ -25,10 +26,10 @@ export default function AddTaskModal({ onAdd, onClose }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 flex-shrink-0">
           <div>
-            {selectedType && (
+            {selectedType && !isEditing && (
               <button
                 onClick={() => setSelectedType(null)}
-                className="text-xs text-blue-600 hover:text-blue-800 mb-0.5 flex items-center gap-1"
+                className="text-xs text-teal-600 hover:text-teal-800 mb-0.5 flex items-center gap-1"
               >
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
@@ -37,7 +38,11 @@ export default function AddTaskModal({ onAdd, onClose }) {
               </button>
             )}
             <h2 className="text-lg font-semibold text-slate-800">
-              {selectedType ? `New ${selectedMeta.label} Task` : 'Add a Task'}
+              {isEditing
+                ? `Edit ${selectedMeta?.label ?? ''} Task`
+                : selectedType
+                  ? `New ${selectedMeta.label} Task`
+                  : 'Add a Task'}
             </h2>
           </div>
           <button
@@ -59,7 +64,7 @@ export default function AddTaskModal({ onAdd, onClose }) {
                 <button
                   key={type.id}
                   onClick={() => setSelectedType(type.id)}
-                  className="flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                  className="flex flex-col items-start gap-1.5 p-4 rounded-xl border border-slate-200 hover:border-teal-300 hover:bg-teal-50 transition-colors text-left"
                 >
                   <span className="text-2xl">{type.icon}</span>
                   <span className="font-semibold text-slate-800 text-sm">{type.label}</span>
@@ -72,6 +77,8 @@ export default function AddTaskModal({ onAdd, onClose }) {
               type={selectedType}
               onSubmit={onAdd}
               onCancel={onClose}
+              initialValues={initialTask}
+              isEditing={isEditing}
             />
           )}
         </div>

@@ -14,6 +14,7 @@ function App() {
   })
   const [showAddModal, setShowAddModal] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
+  const [editingTask, setEditingTask] = useState(null)
 
   useEffect(() => {
     localStorage.setItem('medmap-tasks', JSON.stringify(tasks))
@@ -32,6 +33,15 @@ function App() {
     setShowAddModal(false)
   }
 
+  const updateTask = (updatedFields) => {
+    setTasks(prev =>
+      prev.map(t =>
+        t.id === editingTask.id ? { ...t, ...updatedFields } : t
+      )
+    )
+    setEditingTask(null)
+  }
+
   const deleteTask = (id) => {
     setTasks(prev => prev.filter(t => t.id !== id))
   }
@@ -48,7 +58,7 @@ function App() {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
@@ -60,7 +70,7 @@ function App() {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center gap-1.5 shadow-sm"
+            className="bg-teal-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-600 active:bg-teal-700 transition-colors flex items-center gap-1.5 shadow-sm"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -78,6 +88,8 @@ function App() {
           onToggleShowCompleted={() => setShowCompleted(p => !p)}
           onToggleComplete={toggleComplete}
           onDelete={deleteTask}
+          onEdit={setEditingTask}
+          onAddTask={() => setShowAddModal(true)}
         />
       </main>
 
@@ -86,6 +98,15 @@ function App() {
         <AddTaskModal
           onAdd={addTask}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+
+      {/* Edit task modal */}
+      {editingTask && (
+        <AddTaskModal
+          onAdd={updateTask}
+          onClose={() => setEditingTask(null)}
+          initialTask={editingTask}
         />
       )}
     </div>
