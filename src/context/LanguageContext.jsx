@@ -1,65 +1,68 @@
 import { createContext, useContext, useState } from 'react'
 
-// ── Bilingual lookup arrays ─────────────────────────────────────────────────
-// Each entry is [englishCanonicalValue, vietnameseLabel]
+// ── Multilingual lookup arrays ──────────────────────────────────────────────
+// Each entry is [englishCanonicalValue, vietnameseLabel, spanishLabel]
 // Tasks always store the English canonical value so data is language-agnostic.
 
 export const SPECIALTIES = [
-  ['Cardiology', 'Tim mạch'],
-  ['Endocrinology', 'Nội tiết'],
-  ['Gastroenterology', 'Tiêu hóa'],
-  ['Hematology/Oncology', 'Huyết học / Ung thư'],
-  ['Nephrology', 'Thận học'],
-  ['Pulmonology', 'Hô hấp'],
-  ['Rheumatology', 'Cơ xương khớp'],
-  ['Allergy and Immunology', 'Dị ứng và Miễn dịch'],
-  ['Dermatology', 'Da liễu'],
-  ['OBGYN', 'Sản phụ khoa'],
-  ['General Surgery', 'Ngoại tổng quát'],
-  ['Orthopedic Surgery', 'Ngoại chỉnh hình'],
-  ['Vascular Surgery', 'Ngoại mạch máu'],
-  ['Thoracic and Cardiac Surgery', 'Ngoại lồng ngực và tim'],
-  ['Neurosurgery', 'Ngoại thần kinh'],
-  ['Plastic/Reconstructive Surgery', 'Phẫu thuật tạo hình'],
-  ['Otolaryngology (ENT)', 'Tai mũi họng (TMH)'],
-  ['Ophthalmology', 'Nhãn khoa'],
-  ['Neurology', 'Thần kinh'],
-  ['Psychiatry', 'Tâm thần'],
-  ['Urology', 'Tiết niệu'],
-  ['Geriatric Medicine', 'Lão khoa'],
-  ['Physical Medicine and Rehabilitation (PM&R)', 'Y học vật lý và phục hồi chức năng'],
+  ['Cardiology', 'Tim mạch', 'Cardiología'],
+  ['Endocrinology', 'Nội tiết', 'Endocrinología'],
+  ['Gastroenterology', 'Tiêu hóa', 'Gastroenterología'],
+  ['Hematology/Oncology', 'Huyết học / Ung thư', 'Hematología/Oncología'],
+  ['Nephrology', 'Thận học', 'Nefrología'],
+  ['Pulmonology', 'Hô hấp', 'Neumología'],
+  ['Rheumatology', 'Cơ xương khớp', 'Reumatología'],
+  ['Allergy and Immunology', 'Dị ứng và Miễn dịch', 'Alergia e Inmunología'],
+  ['Dermatology', 'Da liễu', 'Dermatología'],
+  ['OBGYN', 'Sản phụ khoa', 'Ginecología y Obstetricia'],
+  ['General Surgery', 'Ngoại tổng quát', 'Cirugía General'],
+  ['Orthopedic Surgery', 'Ngoại chỉnh hình', 'Cirugía Ortopédica'],
+  ['Vascular Surgery', 'Ngoại mạch máu', 'Cirugía Vascular'],
+  ['Thoracic and Cardiac Surgery', 'Ngoại lồng ngực và tim', 'Cirugía Torácica y Cardíaca'],
+  ['Neurosurgery', 'Ngoại thần kinh', 'Neurocirugía'],
+  ['Plastic/Reconstructive Surgery', 'Phẫu thuật tạo hình', 'Cirugía Plástica y Reconstructiva'],
+  ['Otolaryngology (ENT)', 'Tai mũi họng (TMH)', 'Otorrinolaringología (ORL)'],
+  ['Ophthalmology', 'Nhãn khoa', 'Oftalmología'],
+  ['Neurology', 'Thần kinh', 'Neurología'],
+  ['Psychiatry', 'Tâm thần', 'Psiquiatría'],
+  ['Urology', 'Tiết niệu', 'Urología'],
+  ['Geriatric Medicine', 'Lão khoa', 'Geriatría'],
+  ['Physical Medicine and Rehabilitation (PM&R)', 'Y học vật lý và phục hồi chức năng', 'Medicina Física y Rehabilitación'],
 ]
 
 export const SCREENING_OPTIONS = [
-  ['DEXA (bone density scan)', 'DEXA (đo mật độ xương)'],
-  ['Colonoscopy', 'Nội soi đại tràng'],
-  ['Fecal Occult Blood Test (FOBT)', 'Xét nghiệm máu ẩn trong phân (FOBT)'],
-  ['Mammogram', 'Chụp nhũ ảnh'],
-  ['Cervical Cancer Screening', 'Tầm soát ung thư cổ tử cung'],
-  ['Diabetic Eye Exam (Ophthalmologist)', 'Khám mắt tiểu đường (Nhãn khoa)'],
+  ['DEXA (bone density scan)', 'DEXA (đo mật độ xương)', 'DEXA (densitometría ósea)'],
+  ['Colonoscopy', 'Nội soi đại tràng', 'Colonoscopía'],
+  ['Fecal Occult Blood Test (FOBT)', 'Xét nghiệm máu ẩn trong phân (FOBT)', 'Prueba de Sangre Oculta en Heces (PSOH)'],
+  ['Mammogram', 'Chụp nhũ ảnh', 'Mamografía'],
+  ['Cervical Cancer Screening', 'Tầm soát ung thư cổ tử cung', 'Tamizaje de Cáncer Cervical'],
+  ['Diabetic Eye Exam (Ophthalmologist)', 'Khám mắt tiểu đường (Nhãn khoa)', 'Examen Ocular Diabético (Oftalmólogo)'],
 ]
 
 export const FASTING_OPTIONS = [
-  ['Fasting', 'Nhịn Ăn'],
-  ['Non-fasting', 'Không Nhịn Ăn'],
+  ['Fasting', 'Nhịn Ăn', 'En Ayunas'],
+  ['Non-fasting', 'Không Nhịn Ăn', 'Sin Ayuno'],
 ]
 
 export const IMAGING_TYPES = [
-  ['CT', 'CT'],
-  ['MRI', 'MRI'],
-  ['X-ray', 'X-quang'],
-  ['Ultrasound', 'Siêu âm'],
-  ['PET', 'PET'],
+  ['CT', 'CT', 'TC'],
+  ['MRI', 'MRI', 'RM'],
+  ['X-ray', 'X-quang', 'Rayos X'],
+  ['Ultrasound', 'Siêu âm', 'Ultrasonido'],
+  ['PET', 'PET', 'PET'],
 ]
 
 /**
- * Given a bilingual lookup array and a stored English canonical value,
+ * Given a multilingual lookup array and a stored English canonical value,
  * return the label for the current language.
  */
 export function getLabel(pairs, value, lang) {
   if (!value) return value
   const pair = pairs.find(p => p[0] === value)
-  return pair ? pair[lang === 'vi' ? 1 : 0] : value
+  if (!pair) return value
+  if (lang === 'vi') return pair[1]
+  if (lang === 'es') return pair[2]
+  return pair[0]
 }
 
 // ── Translations ────────────────────────────────────────────────────────────
@@ -224,6 +227,86 @@ const translations = {
     cancel: 'Hủy',
     saveChanges: 'Lưu Thay Đổi',
   },
+
+  es: {
+    // Header
+    tagline: 'tu lista de tareas médicas',
+    addTask: 'Agregar Tarea',
+
+    // Dashboard
+    completedTasksTitle: 'Tareas Completadas',
+    openTasksTitle: 'Tareas Pendientes',
+    tasksDone: (n) => `${n} tarea${n !== 1 ? 's' : ''} completada${n !== 1 ? 's' : ''}`,
+    tasksRemaining: (n) => `${n} tarea${n !== 1 ? 's' : ''} pendiente${n !== 1 ? 's' : ''}`,
+    viewOpen: 'Ver Pendientes',
+    viewCompleted: 'Ver Completadas',
+    noCompletedYet: 'Aún no hay tareas completadas',
+    noCompletedDesc: 'Marca una tarea como hecha y aparecerá aquí',
+    noOpenTasks: 'Sin tareas pendientes',
+    noOpenDesc: 'Tu lista de tareas médicas está vacía',
+
+    // Task Card
+    typeLabels: {
+      lab: 'Laboratorios',
+      imaging: 'Imágenes Médicas',
+      referral: 'Referido',
+      screening: 'Tamizaje',
+      prescription: 'Receta',
+      callback: 'Llamar',
+    },
+    completeBadge: 'Completado',
+    overdueBadge: 'Atrasado',
+    markIncomplete: 'Marcar como incompleto',
+    markComplete: 'Marcar como completo',
+    editTaskLabel: 'Editar tarea',
+    deleteTaskLabel: 'Eliminar tarea',
+    dateLocale: 'es-ES',
+
+    // Add Task Modal
+    back: 'Atrás',
+    editTitle: (label) => `Editar Tarea: ${label}`,
+    newTitle: (label) => `Nueva Tarea: ${label}`,
+    addATask: 'Agregar una Tarea',
+    close: 'Cerrar',
+    taskTypes: [
+      { id: 'lab', label: 'Laboratorios', icon: '🧪', desc: 'Análisis de sangre, orina' },
+      { id: 'imaging', label: 'Imágenes Médicas', icon: '🩻', desc: 'TC, RM, Rayos X, Ultrasonido' },
+      { id: 'referral', label: 'Referido', icon: '👨‍⚕️', desc: 'Ver a un especialista' },
+      { id: 'screening', label: 'Tamizaje', icon: '🔍', desc: 'Colonoscopía, mamografía, etc.' },
+      { id: 'prescription', label: 'Recoger Receta', icon: '💊', desc: 'Medicamentos a recoger' },
+      { id: 'callback', label: 'Llamar', icon: '📞', desc: 'Llamar para hacer una cita' },
+    ],
+
+    // Task Form
+    taskNameLabel: 'Nombre de la Tarea',
+    taskNamePlaceholders: {
+      lab: 'ej. "Panel Lipídico" o "QMS"',
+      imaging: 'ej. "Rayos X" o "Ultrasonido"',
+      screening: 'ej. "DEXA" o "Colonoscopía"',
+      referral: 'ej. "Cirugía Ortopédica" o "Dermatología"',
+      default: 'Nombre de la Tarea',
+    },
+    fastingLabel: 'En Ayunas',
+    dueDateLabel: 'Fecha Límite',
+    orderingDoctorLabel: 'Médico que Ordena',
+    notesLabel: 'Notas',
+    notesPlaceholder: 'Notas adicionales…',
+    imagingTypeLabel: 'Tipo de Imagen',
+    officePhoneLabel: 'Teléfono del Consultorio',
+    bodyPartsLabel: 'Parte(s) del Cuerpo',
+    bodyPartsPlaceholder: 'ej. Tórax, Abdomen',
+    specialtyLabel: 'Especialidad',
+    selectSpecialtyPlaceholder: 'Seleccionar especialidad…',
+    doctorNameLabel: 'Nombre del Médico',
+    phoneNumberLabel: 'Número de Teléfono',
+    screeningTypeLabel: 'Tipo de Tamizaje',
+    selectScreeningPlaceholder: 'Seleccionar tamizaje…',
+    prescriptionNamesLabel: 'Nombre(s) del Medicamento',
+    prescriptionPlaceholder: 'ej. Metformina 500mg, Lisinopril 10mg',
+    requiredField: 'Este campo es obligatorio',
+    cancel: 'Cancelar',
+    saveChanges: 'Guardar Cambios',
+  },
 }
 
 // ── Context ─────────────────────────────────────────────────────────────────
@@ -232,11 +315,14 @@ export const LanguageContext = createContext()
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
-    return localStorage.getItem('medmap-lang') || 'en'
+    const saved = localStorage.getItem('medmap-lang')
+    return ['en', 'vi', 'es'].includes(saved) ? saved : 'en'
   })
 
-  const toggleLanguage = () => {
-    const next = lang === 'en' ? 'vi' : 'en'
+  const LANG_CYCLE = ['en', 'vi', 'es']
+
+  const toggleLanguage = (target) => {
+    const next = target ?? LANG_CYCLE[(LANG_CYCLE.indexOf(lang) + 1) % LANG_CYCLE.length]
     setLang(next)
     localStorage.setItem('medmap-lang', next)
   }
@@ -246,6 +332,7 @@ export function LanguageProvider({ children }) {
       {children}
     </LanguageContext.Provider>
   )
+
 }
 
 export function useLanguage() {

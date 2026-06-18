@@ -75,15 +75,23 @@ function AppInner() {
           {/* Right side: language toggle + add task */}
           <div className="flex items-center gap-2">
             {/* Language toggle */}
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-0.5 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors"
-              aria-label="Toggle language"
-            >
-              <span className={lang === 'en' ? 'text-teal-600' : 'text-slate-400'}>EN</span>
-              <span className="text-slate-300 mx-1">|</span>
-              <span className={lang === 'vi' ? 'text-teal-600' : 'text-slate-400'}>VI</span>
-            </button>
+            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden text-xs font-semibold">
+              {[['en', 'EN'], ['vi', 'VI'], ['es', 'ES']].map(([code, label], i) => (
+                <button
+                  key={code}
+                  onClick={() => toggleLanguage(code)}
+                  className={`px-2.5 py-1.5 transition-colors ${
+                    lang === code
+                      ? 'bg-teal-500 text-white'
+                      : 'text-slate-400 hover:bg-slate-50'
+                  } ${i > 0 ? 'border-l border-slate-200' : ''}`}
+                  aria-label={`Switch to ${label}`}
+                  aria-pressed={lang === code}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
             {/* Add task */}
             <button
